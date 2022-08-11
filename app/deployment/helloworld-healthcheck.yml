@@ -19,7 +19,16 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "500m"
+        ports:
+        - containerPort: 3000
+          name: nodejs-port
         livenessProbe:
+          httpGet:
+            path: /
+            port: nodejs-port
+          initialDelaySeconds: 15
+          timeoutSeconds: 30
+        readinessProbe:
           httpGet:
             path: /
             port: nodejs-port
