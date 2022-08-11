@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helloworld-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: helloworld
+  template:
+    metadata:
+      labels:
+        app: helloworld
+    spec:
+      containers:
+      - name: helloworld
+        image: registry.infrastructure.local/marchino/myapp:2
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: nodejs-port
+          initialDelaySeconds: 15
+          timeoutSeconds: 30
