@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helloworld-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: helloworld-db
+  template:
+    metadata:
+      labels:
+        app: helloworld-db
+    spec:
+      initContainers:
+      - name: wait-for-db
+        image: busybox
+        env:
+        - name: MYSQL_HOST
+          value: database-service
+        command:
+          - "/bin/sh"
+          - "-c"
+          - "until /bin/nc -z $MYSQL_HOST 3306; do /bin/sleep 1; done"
+      containers:
+      - name: k8s-demo
+        image: registry.infrastructure.local/marchino/myapp:3
+        command: [ "node", "index-db.js" ]
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 3000
+          name: nodejs-port
+        env:
+        - name: MYSQL_HOST
+          value: database-service
+        - name: MYSQL_USER
+          value: root
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: rootPassword
+              name: helloworld-secrets
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              key: database
+              name: helloworld-secrets
