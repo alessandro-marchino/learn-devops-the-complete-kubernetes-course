@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: helloworld-nginx
+  labels:
+    app: helloworld-nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.11
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+    - containerPort: 80
+    volumeMounts:
+      - mountPath: /etc/nginx/conf.d
+        name: config-volume
+  - name: k8s-demo
+    image: registry.infrastructure.local/marchino/myapp:3
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 3000
+  volumes:
+    - name: config-volume
+      configMap:
+        name: nginx-config
+        items:
+          - key: reverseproxy.conf
+            path: reverseproxy.conf
